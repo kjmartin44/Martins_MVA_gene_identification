@@ -49,8 +49,7 @@ File paths are command line options (see above). The other settings are at the t
 
 | Setting | What it does |
 | --- | --- |
-| `PROBAND_ID` | Sample name used in the first column when `ID_IS_GENE` is `FALSE`. |
-| `ID_IS_GENE` | If `TRUE`, the first column holds the gene symbol. If `FALSE`, it holds `PROBAND_ID`. |
+| `PROBAND_ID` | Value written to the `proband_id` column in every row (`PROBAND01`). The challenge scorer accepts only this identifier. |
 | `HPO_TERMS` | The patient's HPO term IDs. |
 | `SEED_GENES` | Genes that are always searched, for a suspected disorder. Use `character(0)` for a purely phenotype driven run. |
 | `N_PANEL` | How many HPO ranked genes to search (500). |
@@ -80,7 +79,7 @@ Comma separated, one row per finding. Text fields are in double quotes, so comma
 
 | Column | Meaning |
 | --- | --- |
-| `proband_id` | Gene symbol or `PROBAND_ID`, depending on `ID_IS_GENE`. |
+| `proband_id` | Proband identifier from the dataset, the same in every row (`PROBAND01`). |
 | `chrom_1`, `pos_1`, `ref_1`, `alt_1` | The first variant. |
 | `chrom_2`, `pos_2`, `ref_2`, `alt_2` | The second variant of a compound heterozygous pair. Empty for single variant findings. |
 | `epcr` | Ranking score from 0.02 to 0.95. Use it to compare findings against each other. It is not a probability. |

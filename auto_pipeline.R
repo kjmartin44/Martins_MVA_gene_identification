@@ -34,10 +34,8 @@ suppressPackageStartupMessages({
 # ---------------------------------------------------------------------
 # CONFIG
 # ---------------------------------------------------------------------
+# Written to proband_id in every row. The challenge scorer accepts only this value.
 PROBAND_ID  <- "PROBAND01"
-# The example rows in the spec show a constant sample ID across loci, but if
-# the challenge actually wants the gene symbol in this column, set TRUE.
-ID_IS_GENE  <- TRUE
 
 # File paths come from the command line:
 #   --vcf    bgzipped, tabix-indexed, single-sample GRCh38 VCF (the .tbi
@@ -453,7 +451,7 @@ if (length(findings)) {
     f <- findings[[ord[k]]]
     v1 <- f$v1; v2 <- f$v2
     data.frame(
-      proband_id = if (ID_IS_GENE) as.character(v1$gene) else PROBAND_ID,
+      proband_id = PROBAND_ID,
       chrom_1 = chrfmt(v1$chrom), pos_1 = as.character(v1$pos),
       ref_1 = v1$ref, alt_1 = v1$alt,
       chrom_2 = if (is.null(v2)) "" else chrfmt(v2$chrom),
