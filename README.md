@@ -26,7 +26,7 @@ The output is a ranked list of research candidates. The scores are hand-set heur
 Rscript auto_pipeline.R \
   --vcf /path/to/input/proband_sample.vcf.gz \
   --hpo /path/to/hpo/phenotype_to_genes.txt \
-  --out /path/to/output/submission.tsv \
+  --out /path/to/output/Martins_auto_pipeline_submission.csv \
   --audit /path/to/output/audit_variants.tsv
 ```
 
@@ -38,7 +38,7 @@ The script prints progress for stages 1 to 6, then a summary table of the findin
 | --- | --- |
 | `--vcf` | Input VCF. Required. Must have a `.tbi` index next to it. |
 | `--hpo` | HPO file `phenotype_to_genes.txt`. Required. |
-| `--out` | Where to write the submission file. Defaults to `submission.tsv` in the current folder. |
+| `--out` | Where to write the submission file. Defaults to `Martins_auto_pipeline_submission.csv` in the current folder. |
 | `--audit` | Where to write the audit file. Defaults to `audit_variants.tsv` in the current folder. |
 
 The script stops with a message if a required option or input file is missing.
@@ -74,9 +74,9 @@ File paths are command line options (see above). The other settings are at the t
 
 ## Output
 
-### Submission file (`OUT_TSV`)
+### Submission file (`OUT_CSV`)
 
-Tab separated, one row per finding.
+Comma separated, one row per finding. Text fields are in double quotes, so commas inside `notes` do not split the row.
 
 | Column | Meaning |
 | --- | --- |

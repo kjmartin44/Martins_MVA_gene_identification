@@ -2,7 +2,7 @@
 # =====================================================================
 # AUTOMATED RARE-DISEASE PIPELINE -> challenge submission
 #
-#   HPO terms + VCF  ->  ranked findings  ->  submission.tsv
+#   HPO terms + VCF  ->  ranked findings  ->  Martins_auto_pipeline_submission.csv
 #
 # No manual curation. Deterministic. Runs offline start to finish.
 #
@@ -44,17 +44,17 @@ ID_IS_GENE  <- TRUE
 #            index must sit next to it)                         [required]
 #   --hpo    HPO file mapping phenotype terms to genes
 #            (phenotype_to_genes.txt)                           [required]
-#   --out    ranked findings table to submit  [default: submission.tsv]
+#   --out    ranked findings table to submit  [default: Martins_auto_pipeline_submission.csv]
 #   --audit  every annotated variant that passed QC; contains patient
 #            genotypes, do not share          [default: audit_variants.tsv]
 USAGE <- paste(
   "Usage: Rscript auto_pipeline.R --vcf <sample.vcf.gz> --hpo <phenotype_to_genes.txt>",
-  "                               [--out <submission.tsv>] [--audit <audit_variants.tsv>]",
+  "                               [--out <Martins_auto_pipeline_submission.csv>] [--audit <audit_variants.tsv>]",
   sep = "\n")
 
 parse_args <- function(argv) {
   opts <- list(vcf = NULL, hpo = NULL,
-               out = "submission.tsv", audit = "audit_variants.tsv")
+               out = "Martins_auto_pipeline_submission.csv", audit = "audit_variants.tsv")
   if (any(argv %in% c("-h", "--help"))) { cat(USAGE, "\n"); quit(status = 0) }
   i <- 1L
   while (i <= length(argv)) {
@@ -85,7 +85,7 @@ if (!file.exists(args$hpo)) stop("HPO file not found: ", args$hpo, call. = FALSE
 
 VCF_PATH  <- args$vcf
 HPO_ANNOT <- args$hpo
-OUT_TSV   <- args$out
+OUT_CSV   <- args$out
 AUDIT_TSV <- args$audit
 
 HPO_TERMS <- c("HP:0002859", "HP:0000121", "HP:0004322", "HP:0001508",
@@ -467,15 +467,15 @@ if (length(findings)) {
   out <- do.call(rbind, rows)[, COLS]
 }
 
-write.table(out, OUT_TSV, sep = "\t", quote = FALSE, row.names = FALSE, na = "")
-Sys.chmod(OUT_TSV, "600")
+write.csv(out, OUT_CSV, row.names = FALSE, na = "")  # quotes text, so commas in notes are safe
+Sys.chmod(OUT_CSV, "600")
 
 cat("\n=== submission ===\n")
 if (nrow(out)) {
   print(out[, c("chrom_1", "pos_1", "chrom_2", "pos_2", "epcr", "finding_type")],
         row.names = FALSE)
 } else cat("no findings\n")
-cat("\n", nrow(out), " rows -> ", OUT_TSV, "\n", sep = "")
+cat("\n", nrow(out), " rows -> ", OUT_CSV, "\n", sep = "")
 cat("audit trail (all annotated variants) -> ", AUDIT_TSV, "\n", sep = "")
 
 invisible(out)
