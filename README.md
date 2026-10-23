@@ -95,7 +95,6 @@ Every annotated variant in the panel genes that passed quality filtering, with g
 
 - Only small variants in the VCF are used. Structural variants, copy number changes, and deep intronic variants are not detected.
 - Only the panel genes are searched. A causal variant in a gene outside the panel is never seen.
-- The default filters are loose on purpose, so that all submission slots fill. Expect many weak candidates.
 - Score weights are chosen by hand and are not fitted to data.
 - Without phasing information, a compound heterozygous pair may actually be on the same copy of the gene. Parental testing is needed to confirm it.
 - The script finishes with several lines of interactive checks (reading the output back, inspecting `BUB1B` rows, testing `gscores`). They are not part of the pipeline and can be removed or moved to a separate file.
