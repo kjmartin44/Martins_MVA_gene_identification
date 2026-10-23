@@ -19,13 +19,14 @@ The output is a ranked list of research candidates. The scores are hand-set heur
 
 ## Quick start
 
-1. Edit the patient settings (`HPO_TERMS`, `SEED_GENES`) in the CONFIG section of `auto_pipeline.R`.
-2. Run it with your file paths:
+1. Edit `SEED_GENES` in the CONFIG section of `auto_pipeline.R` if you suspect a particular disorder.
+2. Run it with your file paths and the patient's HPO terms:
 
 ```bash
 Rscript auto_pipeline.R \
   --vcf /path/to/input/proband_sample.vcf.gz \
   --hpo /path/to/hpo/phenotype_to_genes.txt \
+  --terms HP:0002859,HP:0000121,HP:0004322 \
   --out /path/to/output/Martins_auto_pipeline_submission.csv \
   --audit /path/to/output/audit_variants.tsv
 ```
@@ -38,6 +39,7 @@ The script prints progress for stages 1 to 6, then a summary table of the findin
 | --- | --- |
 | `--vcf` | Input VCF. Required. Must have a `.tbi` index next to it. |
 | `--hpo` | HPO file `phenotype_to_genes.txt`. Required. |
+| `--terms` | The patient's HPO term IDs, separated by commas, for example `HP:0002859,HP:0000121`. Defaults to the proband's eight terms. The script stops if an ID is not in the form `HP:` plus seven digits, and warns if the HPO file has no genes for a term. |
 | `--out` | Where to write the submission file. Defaults to `Martins_auto_pipeline_submission.csv` in the current folder. |
 | `--audit` | Where to write the audit file. Defaults to `audit_variants.tsv` in the current folder. |
 
@@ -50,7 +52,6 @@ File paths are command line options (see above). The other settings are at the t
 | Setting | What it does |
 | --- | --- |
 | `PROBAND_ID` | Value written to the `proband_id` column in every row (`PROBAND01`). The challenge scorer accepts only this identifier. |
-| `HPO_TERMS` | The patient's HPO term IDs. |
 | `SEED_GENES` | Genes that are always searched, for a suspected disorder. Use `character(0)` for a purely phenotype driven run. |
 | `N_PANEL` | How many HPO ranked genes to search (500). |
 | `PAD` | Bases of flanking sequence read around each gene (5000). |
@@ -73,22 +74,22 @@ File paths are command line options (see above). The other settings are at the t
 
 ## Output
 
-### Submission file (`OUT_CSV`)
+### Submission file
 
-Comma separated, one row per finding. Text fields are in double quotes, so commas inside `notes` do not split the row.
+Written to the `--out` path (default `Martins_auto_pipeline_submission.csv`). It is comma separated, with one row per finding. Text fields are in double quotes, so commas inside `notes` do not split the row. The script sets the file so that only your user can read it.
 
 | Column | Meaning |
 | --- | --- |
-| `proband_id` | Proband identifier from the dataset, the same in every row (`PROBAND01`). |
+| `proband_id` | Proband identifier from the dataset, the same in every row (`PROBAND01`). It is set by `PROBAND_ID` in the script. The sample name in the VCF is not used. |
 | `chrom_1`, `pos_1`, `ref_1`, `alt_1` | The first variant. |
 | `chrom_2`, `pos_2`, `ref_2`, `alt_2` | The second variant of a compound heterozygous pair. Empty for single variant findings. |
 | `epcr` | Ranking score from 0.02 to 0.95. Use it to compare findings against each other. It is not a probability. |
 | `finding_type` | `primary` or `secondary`. |
-| `notes` | Plain text summary: gene, consequence, amino acid change, frequency, quality values, and phasing status. |
+| `notes` | Plain text summary that starts with the gene symbol, then the consequence, amino acid change, frequency, quality values, and phasing status. |
 
-### Audit file (`AUDIT_TSV`)
+### Audit file
 
-Every annotated variant in the panel genes that passed quality filtering, with gene, position, genotype, consequence, frequency, depth, genotype quality, allele balance, and phasing fields. Use it to check why a variant was or was not reported.
+Written to the `--audit` path (default `audit_variants.tsv`). It is tab separated, and like the submission file it is readable only by your user. It contains patient genotypes, so do not share it. It lists every annotated variant in the panel genes that passed quality filtering, with gene, position, genotype, consequence, frequency, depth, genotype quality, allele balance, and phasing fields. Use it to check why a variant was or was not reported.
 
 ## Limitations
 
@@ -96,7 +97,6 @@ Every annotated variant in the panel genes that passed quality filtering, with g
 - Only the panel genes are searched. A causal variant in a gene outside the panel is never seen.
 - Score weights are chosen by hand and are not fitted to data.
 - Without phasing information, a compound heterozygous pair may actually be on the same copy of the gene. Parental testing is needed to confirm it.
-- The script finishes with several lines of interactive checks (reading the output back, inspecting `BUB1B` rows, testing `gscores`). They are not part of the pipeline and can be removed or moved to a separate file.
 
 ## License
 

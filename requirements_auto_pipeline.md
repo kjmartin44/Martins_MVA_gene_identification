@@ -3,7 +3,7 @@
 ## System
 
 - Linux. The pipeline was written and run on Linux. Windows users can run it in WSL2 (Windows Subsystem for Linux) with a Linux distribution such as Ubuntu, and install R, the Bioconductor packages, and HTSlib inside it. It has not been tested on native Windows or macOS.
-- R 4.4 or later. The script adds `/home/martiki/R/rocker-rstudio/4.4` to the library path on its first line. Change or remove that line if your packages are installed elsewhere.
+- R 4.4 or later. If your packages are in a personal library, uncomment the `.libPaths(...)` line near the top of the script and set it to your library path.
 - Bioconductor, installed through `BiocManager`. Use the Bioconductor release that matches your R version.
 - `tabix` and `bgzip` (part of HTSlib) to compress and index the VCF if it is not already indexed.
 - Enough disk space and memory for the genome and annotation packages below. They are large, and the gnomAD v4 data is the largest.
@@ -41,10 +41,10 @@ BiocManager::install(c(
 ))
 ```
 
-To install into the library the script expects, set the path first:
+To install into a personal library, set its path first, and use the same path in the script:
 
 ```r
-.libPaths(c("/home/martiki/R/rocker-rstudio/4.4", .libPaths()))
+.libPaths(c("/path/to/your/R/package/library", .libPaths()))
 ```
 
 ## Check the install

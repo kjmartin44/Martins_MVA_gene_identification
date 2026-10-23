@@ -42,16 +42,20 @@ PROBAND_ID  <- "PROBAND01"
 #            index must sit next to it)                         [required]
 #   --hpo    HPO file mapping phenotype terms to genes
 #            (phenotype_to_genes.txt)                           [required]
+#   --terms  the proband's HPO term IDs, comma separated, for example
+#            "HP:0002859,HP:0000121"          [default: the proband's eight terms]
 #   --out    ranked findings table to submit  [default: Martins_auto_pipeline_submission.csv]
 #   --audit  every annotated variant that passed QC; contains patient
 #            genotypes, do not share          [default: audit_variants.tsv]
 USAGE <- paste(
   "Usage: Rscript auto_pipeline.R --vcf <sample.vcf.gz> --hpo <phenotype_to_genes.txt>",
+  "                               [--terms <HP:0002859,HP:0000121,...>]",
   "                               [--out <Martins_auto_pipeline_submission.csv>] [--audit <audit_variants.tsv>]",
   sep = "\n")
 
 parse_args <- function(argv) {
   opts <- list(vcf = NULL, hpo = NULL,
+               terms = "HP:0002859,HP:0000121,HP:0004322,HP:0001508,HP:0003202,HP:0001622,HP:0001518,HP:0200067",
                out = "Martins_auto_pipeline_submission.csv", audit = "audit_variants.tsv")
   if (any(argv %in% c("-h", "--help"))) { cat(USAGE, "\n"); quit(status = 0) }
   i <- 1L
@@ -86,8 +90,12 @@ HPO_ANNOT <- args$hpo
 OUT_CSV   <- args$out
 AUDIT_TSV <- args$audit
 
-HPO_TERMS <- c("HP:0002859", "HP:0000121", "HP:0004322", "HP:0001508",
-               "HP:0003202", "HP:0001622", "HP:0001518", "HP:0200067")  # the proband's terms
+HPO_TERMS <- unique(Filter(nzchar, strsplit(toupper(args$terms), "[,[:space:]]+")[[1]]))
+bad_terms <- HPO_TERMS[!grepl("^HP:[0-9]{7}$", HPO_TERMS)]
+if (!length(HPO_TERMS) || length(bad_terms))
+  stop("--terms needs HPO IDs like HP:0002859, separated by commas",
+       if (length(bad_terms)) paste0(" (not valid: ", paste(bad_terms, collapse = ", "), ")"),
+       call. = FALSE)
 
 # Genes always searched regardless of HPO ranking, for a suspected disorder.
 # Leave as character(0) for a purely phenotype-driven run.
@@ -150,6 +158,8 @@ if (file.exists(HPO_ANNOT) && length(HPO_TERMS)) {
     n <- length(unique(ann$sym[ann$hpo_id == t]))
     if (n > 0) log(total / n) else 0
   })
+  if (any(w == 0))
+    warning("no genes annotated to: ", paste(names(w)[w == 0], collapse = ", "), call. = FALSE)
   sub_ann <- ann[ann$hpo_id %in% HPO_TERMS, ]
   if (nrow(sub_ann)) {
     sc <- tapply(sub_ann$hpo_id, sub_ann$sym,
